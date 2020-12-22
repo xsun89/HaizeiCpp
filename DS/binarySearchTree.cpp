@@ -3,7 +3,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
-
+#define KEY(n) (n ? n->key : 0)
 typedef struct Node {
     int key;
     struct Node *lchild;
@@ -11,7 +11,7 @@ typedef struct Node {
 }Node;
 
 typedef struct SearchTree{
-    Node *head;
+    Node *root;
     int n;
 }SearchTree;
 
@@ -25,28 +25,28 @@ Node *getNewNode(int val){
 SearchTree *getSearchTree()
 {
     SearchTree *tree = (SearchTree *)malloc(sizeof(SearchTree));
-    tree->head = NULL;
+    tree->root = NULL;
     tree->n = 0;
 
     return tree;
 }
 
-void insertNode(Node *root, int val){
+Node *insertNode(Node *root, int val){
     if(root == NULL){
         root = getNewNode(val);
-        return;
+        return root;
     }
 
     if(val > root->key){
-        insertNode(root->rchild, val);
+        root->rchild = insertNode(root->rchild, val);
     } else {
-        insertNode(root->lchild, val);
+        root->lchild = insertNode(root->lchild, val);
     }
-    return;
+    return root;
 }
 
 void insert(SearchTree *tree, int val){
-    insertNode(tree->head, val);
+    tree->root = insertNode(tree->root, val);
     tree->n++;
     return;
 }
@@ -57,14 +57,14 @@ Node *searchNode(Node *root, int val){
         return root;
     }
     if(val > root->key){
-        searchNode(root->rchild, val);
+        return searchNode(root->rchild, val);
     }else if(val < root->key){
-        searchNode(root->lchild, val);
+        return searchNode(root->lchild, val);
     }
 }
 
 Node *search(SearchTree *tree, int val){
-    Node *node = searchNode(tree->head, val);
+    Node *node = searchNode(tree->root, val);
     return node;
 }
 void clearNode(Node *node){
@@ -78,40 +78,91 @@ void clearNode(Node *node){
 void clear(SearchTree *tree)
 {
     if(tree == NULL) return;
-    clearNode(tree->head);
+    clearNode(tree->root);
     free(tree);
 
     return;
 }
-void removeNode(Node *root){
-    if(root == NULL) return;
-    if(root ->lchild == NULL && root->rchild == NULL){
-        clearNode(root);
-        return;
-    }
-    if(root ->rchild != NULL && root->lchild == NULL){
-        root->key = root ->rchild->key;
-        removeNode(root ->rchild);
-        return;
-    }
-    if(root ->rchild == NULL && root->lchild != NULL){
-        root->key = root ->lchild->key;
-        removeNode(root ->lchild);
-        return;
-    }
 
-
+Node *predessor(Node *root){
+    Node *tmpNode = root->lchild;
+    while(tmpNode != NULL){
+        tmpNode = tmpNode->rchild;
+    }
+    return tmpNode;
 }
-void remove(SearchTree *tree, int val){
-    Node *node = search(tree, val);
-    if(node != NULL) {
-        removeNode(node, val);
-        tree->n--;
+Node *eraseNode(Node *root, int val){
+    if(root == NULL) return root;
+    if(val > root->key){
+        root->rchild = eraseNode(root->rchild, val);
+    }else if(val < root->key){
+        root->lchild = eraseNode(root->lchild, val);
+    }else{
+        if(root->lchild == NULL || root->rchild == NULL){
+            Node *node = root->lchild ? root->lchild :  root->rchild;
+            free(root);
+            return node;
+        }else{
+            Node *node = predessor(root);
+            root->key = node->key;
+            root->lchild = eraseNode(root->lchild, node->key);
+        }
     }
+
+    return root;
+}
+
+void erase(SearchTree *tree, int val){
+    tree->root = eraseNode(tree->root, val);
+    tree->n--;
     return;
 }
 
+void print(Node *root)
+{
+    printf("(%d, %d, %d)\n",
+           KEY(root),
+           KEY(root->lchild), KEY(root->rchild)
+    );
+    return ;
+}
+
+void in_order(Node *root){
+    if(root == NULL) return;
+    in_order(root->lchild);
+    print(root);
+    in_order(root->rchild);
+}
+void output(SearchTree *tree){
+    if(tree == NULL) return;
+    in_order(tree->root);
+}
 int main()
 {
+    int op, val;
+    SearchTree *tree = getSearchTree();
+    while (~scanf("%d%d", &op, &val)) {
+        switch (op) {
+            case 0: {
+                Node *node = search(tree, val);
+                int ret = 0;
+                if (node != NULL) {
+                    ret = 1;
+                }
+                printf("search %d, result : %d\n", val, ret);
+                break;
+            }
+            case 1:
+                insert(tree, val);
+                break;
+            case 2:
+                erase(tree, val);
+                break;
+        }
+        if (op == 1 || op == 2) {
+            output(tree);
+            printf("------------\n");
+        }
+    }
     return 0;
 }
