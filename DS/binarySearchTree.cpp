@@ -4,20 +4,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define KEY(n) (n ? n->key : 0)
+#define SIZE(n) (n ? n->size : 0)
+#define L(n) (n ? n->lchild : NULL)
 typedef struct Node {
-    int key;
+    int key, size;
     struct Node *lchild;
     struct Node *rchild;
 }Node;
 
 typedef struct SearchTree{
     Node *root;
-    int n;
 }SearchTree;
 
 Node *getNewNode(int val){
     Node *node = (Node *)malloc(sizeof(Node));
     node->key = val;
+    node->size = 1;
     node->lchild = node->rchild = NULL;
     return node;
 }
@@ -26,28 +28,29 @@ SearchTree *getSearchTree()
 {
     SearchTree *tree = (SearchTree *)malloc(sizeof(SearchTree));
     tree->root = NULL;
-    tree->n = 0;
-
     return tree;
 }
 
 Node *insertNode(Node *root, int val){
     if(root == NULL){
-        root = getNewNode(val);
+        return getNewNode(val);
+    }
+    if(root->key == val){
         return root;
     }
-
     if(val > root->key){
         root->rchild = insertNode(root->rchild, val);
     } else {
         root->lchild = insertNode(root->lchild, val);
     }
+    //root->size = SIZE(root->lchild) + SIZE(root->rchild) + 1;
+    root->size++;
     return root;
 }
 
+
 void insert(SearchTree *tree, int val){
     tree->root = insertNode(tree->root, val);
-    tree->n++;
     return;
 }
 
@@ -114,14 +117,25 @@ Node *eraseNode(Node *root, int val){
 
 void erase(SearchTree *tree, int val){
     tree->root = eraseNode(tree->root, val);
-    tree->n--;
     return;
+}
+
+Node *search_k(Node *root, int k){
+    if(root == NULL) return NULL;
+    if(SIZE(L(root)) == k - 1){
+        return root;
+    }
+    if(SIZE(L(root)) >= k){
+        return search_k(root->lchild, k);
+    }else{
+        return search_k(root->rchild, k - SIZE(L(root)) - 1);
+    }
 }
 
 void print(Node *root)
 {
-    printf("(%d, %d, %d)\n",
-           KEY(root),
+    printf("(%d[%d], %d, %d)\n",
+           KEY(root), SIZE(root),
            KEY(root->lchild), KEY(root->rchild)
     );
     return ;
@@ -158,6 +172,11 @@ int main()
             case 2:
                 erase(tree, val);
                 break;
+            case 3: {
+                Node *node= search_k(tree->root, val);
+                printf("search %d th value, result : %d\n", val, node != NULL ? node->key : -1);
+                break;
+            }
         }
         if (op == 1 || op == 2) {
             output(tree);
