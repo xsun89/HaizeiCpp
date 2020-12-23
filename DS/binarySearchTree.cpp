@@ -141,6 +141,8 @@ void print(Node *root)
     return ;
 }
 
+
+
 void in_order(Node *root){
     if(root == NULL) return;
     in_order(root->lchild);
@@ -151,6 +153,25 @@ void output(SearchTree *tree){
     if(tree == NULL) return;
     in_order(tree->root);
 }
+
+void top_k(Node *root, int k)
+{
+    if(root == NULL || k == 0){
+        return;
+    }
+    if(SIZE(L(root)) == k -1){
+        in_order(root->lchild);
+        print(root);
+    }else if(SIZE(L(root)) > k - 1){
+        top_k(root->lchild, k);
+    }else{
+        in_order(root->lchild);
+        print(root);
+        top_k(root->rchild, k - SIZE(L(root->lchild)) - 1);
+    }
+    return;
+}
+
 int main()
 {
     int op, val;
@@ -177,6 +198,11 @@ int main()
                 printf("search %d th value, result : %d\n", val, node != NULL ? node->key : -1);
                 break;
             }
+            case 4: {
+                printf("output top-%d elements\n", val);
+                top_k(tree->root, val);
+                printf("------------\n");
+            } break;
         }
         if (op == 1 || op == 2) {
             output(tree);
