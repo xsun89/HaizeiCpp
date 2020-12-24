@@ -14,7 +14,7 @@ Node __NIL;
 __attribute__((constructor))
 void init_NIL(){
     NIL->key = 0;
-    NIL->color = 0;
+    NIL->color = 1;
     NIL->lchild = NIL->rchild = NIL;
 }
 
@@ -36,19 +36,27 @@ void clear(Node *root){
     return;
 }
 
-Node *maintain(Node *root)
+int hasRedChild(Node *root){
+    if(root->lchild->color == 0 || root->rchild->color == 0){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+Node *insert_maintain(Node *root)
 {
     if(root == NIL) return NIL;
-    if(root->lchild->color == 1 && root->rchild->color == 1) return root;
+    if(!hasRedChild(root)) return root;
     if(root->lchild->color == 0 && root->rchild->color == 0){
         root->lchild->color = 1;
         root->rchild->color = 1;
         root->color = 0;
     }
     int flag = 0;
-    if(root->rchild->color == 1 && root->lchild->color == 0){
+    //从爷爷节点往下看
+    if(root->lchild->color == 0 && hasRedChild(root->lchild)){
         flag = 1;
-    }else if(root->rchild->color == 0 && root->lchild->color == 1){
+    }else if(root->rchild->color == 0 && hasRedChild(root->rchild)){
         flag = 2;
     }
 
@@ -65,7 +73,7 @@ Node *__insert(Node *root, int val){
         root->rchild = insert(root->rchild, val);
     }
 
-    return maintain(root);
+    return insert_maintain(root);
 }
 
 Node *insert(Node *root, int val){
