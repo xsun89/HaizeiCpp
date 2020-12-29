@@ -16,6 +16,7 @@ void init_NIL(){
     NIL->key = 0;
     NIL->color = 1;
     NIL->lchild = NIL->rchild = NIL;
+    return;
 }
 
 Node *getNewNode(int val){
@@ -43,34 +44,61 @@ int hasRedChild(Node *root){
         return 0;
     }
 }
+
+void changeColor(Node *root){
+    root->lchild->color = 1;
+    root->rchild->color = 1;
+    root->color = 0;
+    return;
+}
+
+Node *left_rotate(Node *root){
+    Node *temp = root->rchild;
+    root->rchild = temp->lchild;
+    temp->lchild = root;
+
+    return temp;
+
+}
+
+Node *right_rotate(Node *root){
+    Node *temp = root->lchild;
+    root->lchild = temp->rchild;
+    temp->rchild = root;
+
+    return temp;
+}
 Node *insert_maintain(Node *root)
 {
     if(root == NIL) return NIL;
     if(!hasRedChild(root)) return root;
     if(root->lchild->color == 0 && root->rchild->color == 0){
-        root->lchild->color = 1;
-        root->rchild->color = 1;
-        root->color = 0;
+        changeColor(root);
+        return root;
     }
-    int flag = 0;
     //从爷爷节点往下看
     if(root->lchild->color == 0 && hasRedChild(root->lchild)){
-        flag = 1;
-    }else if(root->rchild->color == 0 && hasRedChild(root->rchild)){
-        flag = 2;
+        if(root->lchild->rchild->color == 0){
+            root->lchild = left_rotate(root->rchild);
+        }
+        root = right_rotate(root);
+        changeColor(root);
+    }else if(root->rchild->color == 0 && hasRedChild(root->rchild)) {
+        if(root->rchild->lchild->color == 0){
+            root->rchild = right_rotate(root->lchild);
+        }
+        root = left_rotate(root);
+        changeColor(root);
     }
-
-
-
     return root;
 }
 Node *__insert(Node *root, int val){
     if(root == NIL) return getNewNode(val);
     if(root->key == val) return root;
     if(root->key > val){
-        root->lchild = insert(root->lchild, val);
+        root->lchild = __insert(root->lchild, val);
     }else{
-        root->rchild = insert(root->rchild, val);
+        root->rchild = __insert(root->rchild, val);
     }
 
     return insert_maintain(root);
@@ -82,7 +110,34 @@ Node *insert(Node *root, int val){
 
     return root;
 }
+void print(Node *root) {
+    printf("[%d]([%d], %d, %d)\n",
+           root->color, root->key,
+           root->lchild->key,
+           root->rchild->key
+    );
+    return ;
+}
+
+void output(Node *root) {
+    if (root == NIL) return ;
+    print(root);
+    output(root->lchild);
+    output(root->rchild);
+    return ;
+}
 int main()
 {
+    int op, val;
+    Node *root = NIL;
+    while (~scanf("%d%d", &op, &val)) {
+        switch (op) {
+            //case 0: root = erase(root, val); break;
+            case 1: root = insert(root, val); break;
+        }
+        output(root);
+        printf("------------\n");
+    }
+
     return 0;
 }
