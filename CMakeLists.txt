@@ -3,4 +3,4 @@ project(HaizeiCpp)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(HaizeiCpp DS/redblackTree.cpp)
+add_executable(HaizeiCpp DS/segmentTree.cpp)
