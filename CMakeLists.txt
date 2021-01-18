@@ -3,4 +3,4 @@ project(HaizeiCpp)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(HaizeiCpp DS/HZOJ049.cpp)
+add_executable(HaizeiCpp Teacher/10.动态规划的优化/5.HZOJ46.cpp)
