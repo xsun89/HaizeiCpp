@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LeetcodeEditor">
+    <option name="projectConfig">
+      <map>
+        <entry key="$USER_HOME$/study/leetcode/leetcode/editor/cn/[141]环形链表.cpp">
+          <value>
+            <LeetcodeEditor>
+              <option name="path" value="$USER_HOME$/study/leetcode/leetcode/editor/cn/[141]环形链表.cpp" />
+              <option name="questionId" value="141" />
+            </LeetcodeEditor>
+          </value>
+        </entry>
+        <entry key="$USER_HOME$/study/leetcode/leetcode/editor/en/[141]Linked List Cycle.cpp">
+          <value>
+            <LeetcodeEditor>
+              <option name="path" value="$USER_HOME$/study/leetcode/leetcode/editor/en/[141]Linked List Cycle.cpp" />
+              <option name="questionId" value="141" />
+            </LeetcodeEditor>
+          </value>
+        </entry>
+        <entry key="/var/folders/sh/rqqjzpgx7sn610l1v8x550n00000gn/T/leetcode/editor/en/[141]Linked List Cycle.cpp">
+          <value>
+            <LeetcodeEditor>
+              <option name="path" value="/var/folders/sh/rqqjzpgx7sn610l1v8x550n00000gn/T/leetcode/editor/en/[141]Linked List Cycle.cpp" />
+              <option name="questionId" value="141" />
+            </LeetcodeEditor>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
