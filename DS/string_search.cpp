@@ -64,12 +64,12 @@ int main()
     char s[100], t[100];
     int flag = 1;
     flag = flag && 1 == 3;
-    /*
+
     while (scanf("%s%s", s, t) != EOF) {
         printf("brute_force(%s, %s) = %d\n", s, t, brute_force(s, t));
         printf("kmp(%s, %s) = %d\n", s, t, kmp(s, t));
     }
-     */
+
     printf("\n");
     return 0;
 }
