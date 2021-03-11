@@ -53,7 +53,12 @@ int main()
         case 1: p = new C(); break;
     }
     judge(p);
-
-    ((void **)&b)[0] = ((void **)&c)[0];
+    A *p1 = new B();
+    A *p2 = new C();
+    judge(p1);
+    judge(p2);
+    swap(((void **)&p1)[0], ((void **)&p2)[0]);
+    judge(p1);
+    judge(p2);
     return 0;
 }
