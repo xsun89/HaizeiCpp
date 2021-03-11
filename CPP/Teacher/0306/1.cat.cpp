@@ -56,6 +56,9 @@ public:
 class A {
 public:
     A() : x(123) {}
+    virtual void say() {
+        cout << x << endl;
+    }
     int x;
 };
 
