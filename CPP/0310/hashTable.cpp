@@ -4,165 +4,140 @@
 // Hash node class template
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
-struct MyKeyHash {
-    unsigned long operator()(const int& k) const
-    {
-        return k % 10;
-    }
-};
-template <typename K, typename V>
-class HashNode {
+
+class Node {
 public:
-    HashNode(const K &key, const V &value) :
-            key(key), value(value), next(NULL) {
+    Node() = default;
+    Node(string key, Node *next = nullptr) :
+        _key(key), _next(next) {
+    }
+    string getKey() const {
+        return _key;
+    }
+    Node *getNext() const {
+        return _next;
+    }
+    void insert(Node *p){
+       p->_next = this->_next;
+       this->_next = p;
+       return ;
     }
 
-    K getKey() const {
-        return key;
+    void erase_next(){
+        if(this->_next == nullptr) return;
+        Node *p = this->_next;
+        this->_next = this->_next->_next;
+        delete p;
+        return;
     }
-
-    V getValue() const {
-        return value;
-    }
-
-    void setValue(V value) {
-        HashNode::value = value;
-    }
-
-    HashNode *getNext() const {
-        return next;
-    }
-
-    void setNext(HashNode *next) {
-        HashNode::next = next;
-    }
-
 private:
-    // key-value pair
-    K key;
-    V value;
+    string _key;
     // next bucket with the same key
-    HashNode *next;
+    Node *_next;
 };
 
-template <typename K>
-struct KeyHash {
-    unsigned long operator()(const K& key) const
-    {
-        return reinterpret_cast<unsigned long>(key) % TABLE_SIZE;
-    }
-};
-
-// Hash map class template
-template <typename K, typename V, typename F = KeyHash<K>>
-class HashMap {
-public:
-    HashMap() {
-        // construct zero initialized hash table of size
-        table = new HashNode<K, V> *[TABLE_SIZE]();
-    }
-
-    ~HashMap() {
-        // destroy all buckets one by one
-        for (int i = 0; i < TABLE_SIZE; ++i) {
-            HashNode<K, V> *entry = table[i];
-            while (entry != NULL) {
-                HashNode<K, V> *prev = entry;
-                entry = entry->getNext();
-                delete prev;
-            }
-            table[i] = NULL;
-        }
-        // destroy the hash table
-        delete [] table;
-    }
-
-    bool get(const K &key, V &value) {
-        unsigned long hashValue = hashFunc(key);
-        HashNode<K, V> *entry = table[hashValue];
-
-        while (entry != NULL) {
-            if (entry->getKey() == key) {
-                value = entry->getValue();
-                return true;
-            }
-            entry = entry->getNext();
-        }
-        return false;
-    }
-
-    void put(const K &key, const V &value) {
-        unsigned long hashValue = hashFunc(key);
-        HashNode<K, V> *prev = NULL;
-        HashNode<K, V> *entry = table[hashValue];
-
-        while (entry != NULL && entry->getKey() != key) {
-            prev = entry;
-            entry = entry->getNext();
-        }
-
-        if (entry == NULL) {
-            entry = new HashNode<K, V>(key, value);
-            if (prev == NULL) {
-                // insert as first bucket
-                table[hashValue] = entry;
-            } else {
-                prev->setNext(entry);
-            }
-        } else {
-            // just update the value
-            entry->setValue(value);
-        }
-    }
-
-    void remove(const K &key) {
-        unsigned long hashValue = hashFunc(key);
-        HashNode<K, V> *prev = NULL;
-        HashNode<K, V> *entry = table[hashValue];
-
-        while (entry != NULL && entry->getKey() != key) {
-            prev = entry;
-            entry = entry->getNext();
-        }
-
-        if (entry == NULL) {
-            // key not found
-            return;
-        }
-        else {
-            if (prev == NULL) {
-                // remove first bucket of the list
-                table[hashValue] = entry->getNext();
-            } else {
-                prev->setNext(entry->getNext());
-            }
-            delete entry;
-        }
-    }
+class HashTable {
+public :
+    typedef function<int(string)> HASH_FUNC_T;
+    HashTable(HASH_FUNC_T hash_func, int size);
+    bool insert(string);
+    bool erase(string);
+    bool find(string);
 
 private:
-    // hash table
-    HashNode<K, V> **table;
-    F hashFunc;
+    int size;
+    vector<Node> data;
+    HASH_FUNC_T hash_func;
 };
 
+HashTable::HashTable(HASH_FUNC_T hash_func, int size = 1000)
+    :hash_func(hash_func), data(size), size(size){
+}
+
+bool HashTable::insert(string key)
+{
+    if(find(key)) return false;
+    int h = this->hash_func(key) % size;
+    data[h].insert(new Node(key));
+    return true;
+}
+bool HashTable::erase(string s)
+{
+    if(!find(s)) return false;
+    int h = hash_func(s) % size;
+    for(Node *p = data[h].getNext(); p != nullptr; p = p->getNext())
+    {
+        if(p->getKey() == s){
+            p->erase_next();
+            return true;
+        }
+    }
+    return false;
+}
+bool HashTable::find(string s)
+{
+    int h = hash_func(s) % size;
+    for(Node *n = data[h].getNext(); n; n = n->getNext()){
+        if(s == n->getKey()){
+            return true;
+        }
+    }
+    return false;
+}
+int BKDRHash(string s) {
+    int seed = 31;
+    int h = 0;
+    for (int i = 0; s[i]; i++) {
+        h = h * seed + s[i];
+    }
+    return h & 0x7fffffff;
+}
+
+class APHash_Class {
+public :
+    int operator()(string s) {
+        int h = 0;
+        for (int i = 0; s[i]; i++) {
+            if (i % 2) {
+                h = (h << 3) ^ s[i] ^ (h >> 5);
+            } else {
+                h = ~((h << 7) ^ s[i] ^ (h >> 11));
+            }
+        }
+        return h & 0x7fffffff;
+    }
+};
 
 int main() {
-    HashMap<int, string, MyKeyHash> hmap;
-    hmap.put(1, "val1");
-    hmap.put(2, "val2");
-    hmap.put(3, "val3");
-
-    string value;
-    hmap.get(2, value);
-    cout << value << endl;
-    bool res = hmap.get(3, value);
-    if (res)
-        cout << value << endl;
-    hmap.remove(3);
-    res = hmap.get(3, value);
-    if (res)
-        cout << value << endl;
+    APHash_Class APHash;
+    HashTable h1(BKDRHash);
+    HashTable h2(APHash);
+    int op;
+    string s;
+    while (cin >> op >> s) {
+        switch (op) {
+            case 0: {
+                cout << "insert " << s << " to hash table 1 = ";
+                cout << h1.insert(s) << endl;
+                cout << "insert " << s << " to hash table 2 = ";
+                cout << h2.insert(s) << endl;
+            } break; // insert
+            case 1: {
+                cout << "erase " << s << " from hash table 1 = ";
+                cout << h1.erase(s) << endl;
+                cout << "erase " << s << " from hash table 2 = ";
+                cout << h2.erase(s) << endl;
+            } break; // erase
+            case 2: {
+                cout << "find " << s << " at hash table 1 = ";
+                cout << h1.find(s) << endl;
+                cout << "find " << s << " at hash table 2 = ";
+                cout << h2.find(s) << endl;
+            } break; // find
+        }
+    }
+    return 0;
 }
 

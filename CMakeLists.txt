@@ -3,4 +3,4 @@ project(HaizeiCpp)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(HaizeiCpp CPP/0310/priority_queue.cpp CPP/0310/hashTable.cpp)
+add_executable(HaizeiCpp CPP/0310/priority_queue.cpp)
