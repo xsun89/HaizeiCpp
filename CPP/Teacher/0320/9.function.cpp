@@ -58,8 +58,13 @@ public :
     function(T (*ptr)(ARGS...)) : fptr(new normal_func<T, ARGS...>(ptr)) {}
     template<typename C>
     function(C &&object) : fptr(new functor<C, T, ARGS...>(object)) {}
-    function(const function<T(ARGS...)> &obj) {} // 拷贝构造
-    function(function<T(ARGS...)> &&obj) {}      // 移动构造
+    function(const function<T(ARGS...)> &obj) {
+        function *fun = new functor<T(ARGS...)>(obj);
+
+    } // 拷贝构造
+    function(function<T(ARGS...)> &&obj) {
+        fptr = obj.fptr;
+    }      // 移动构造
     
     function &operator=(const function &obj) {}
     function &operator=(function &&obj) {}
